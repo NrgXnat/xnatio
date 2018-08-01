@@ -462,9 +462,44 @@ class SubjectData(Data):
     def get_selected_groups_ui(self):
         return self.groupsDisplayContainer
 
+    def get_data(self, options=None):
 
+        # todo: test this method
 
+        """
+           Aggregates and returns data from selected subjects
 
+           Flattens out the heirarchal data by combining like data into points using their least common ancestor
 
+           Parameters
+           ----------
+           options: dict
+               Options for the aggregation
 
+               "format": "list" | "points"
+                   the format of the data to be returned
+                   list returns a dict of labelled lists of data
+                   points returns a list of labelled dict data points
+                   default: "points"
+
+            Returns
+            -------
+            list or dict
+                (see options > "format")
+        """
+        localOptions = {}.update(self.options)
+        if isinstance(options, dict):
+            localOptions.update(options)
+
+        subjectIds = self.get_selected_subject_ids()
+
+        allData = self.data
+
+        self.data = [x for x in allData if x[options['id_field']] in subjectIds] #filter the selected subjects
+
+        out = Data.get_data(self, options)
+
+        self.data = allData
+
+        return out
 
