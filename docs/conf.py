@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'xnatio'
-copyright = '2018, Aidan Kelley'
+copyright = '2018, Washington University School of Medicine'
 author = 'Aidan Kelley'
 
 # The short X.Y version
@@ -30,6 +30,8 @@ release = '0.0.1'
 
 
 # -- General configuration ---------------------------------------------------
+
+html_theme = "sphinx_rtd_theme"
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #

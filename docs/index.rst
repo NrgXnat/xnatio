@@ -10,9 +10,6 @@ Welcome to xnatio's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-.. autoclass:: xnatio.Data
-    :members:
-
 
 Indices and tables
 ==================
@@ -20,3 +17,6 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+* :ref:`data`
+* :ref:`subjectdata`
+* :ref:`xnatui`
