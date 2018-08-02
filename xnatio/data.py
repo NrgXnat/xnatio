@@ -85,7 +85,7 @@ class Data:
         self.paths[pathPretty] = path
         return self.paths
 
-    def get_ui(self):
+    def data_ui(self):
         """
             Returns a gui to allow the user to select data fields
 
@@ -537,3 +537,5 @@ class Data:
         self.formattedData = None
 
         return self.columns
+
+    # todo:: UI for adding columns

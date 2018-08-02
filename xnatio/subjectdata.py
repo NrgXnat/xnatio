@@ -459,7 +459,7 @@ class SubjectData(Data):
 
         return subjectIds
 
-    def get_selected_groups_ui(self):
+    def select_groups_ui(self):
         return self.groupsDisplayContainer
 
     def get_data(self, options=None):

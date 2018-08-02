@@ -120,7 +120,7 @@ class XnatUI:
             self.projectIds = sorted(projectIds, key=lambda s: s.lower())
             return self.projectIds
 
-    def get_available_projects_ui(self):
+    def select_projects_ui(self):
         """
             Gets the available projects then returns the UI for selecting them
 
@@ -230,7 +230,7 @@ class XnatUI:
         """
         return self.selectedProjectIds
 
-    def fetch_subjects(self, options=None):
+    def get_subjects(self, options=None):
         """
             Fetches (if not fetched already) subjectData
 
@@ -340,7 +340,7 @@ class XnatUI:
         self.experimentTypes = experimentTypes
         return self.experimentTypes
 
-    def get_available_experiments_ui(self):
+    def select_experiments_ui(self):
         """
             Gets the UI for selecting experiments
 
