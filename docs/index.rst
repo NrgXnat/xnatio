@@ -7,9 +7,12 @@ Welcome to xnatio's documentation!
 ==================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
+   installation
+   docindex
+   ui_example
 
 Indices and tables
 ==================
@@ -17,6 +20,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-* :ref:`data`
-* :ref:`subjectdata`
-* :ref:`xnatui`

@@ -7,12 +7,12 @@ Welcome to xnatio's documentation!
 ==================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
 
-.. autoclass:: xnatio.Data
-    :members:
-
+   installation
+   docindex
+   ui_example
 
 Indices and tables
 ==================
