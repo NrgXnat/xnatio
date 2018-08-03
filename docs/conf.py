@@ -166,3 +166,6 @@ texinfo_documents = [
 
 
 # -- Extension configuration -------------------------------------------------
+
+nbsphinx_allow_errors = True
+nbsphinx_execute = 'never'
