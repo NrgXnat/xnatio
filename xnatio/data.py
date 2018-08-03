@@ -1,5 +1,4 @@
 import ipywidgets as widgets
-import traceback
 from dateutil import parser as dateParser
 
 
@@ -203,7 +202,6 @@ class Data:
                 data = dataFromIndices(self.data, path)
                 indices = getIndices(data)
             except:
-                traceback.print_exc()
                 # it's final, add the path to something
                 self.select_path(path)
             else:
@@ -262,7 +260,7 @@ class Data:
            options: dict
                Options for the aggregation
 
-               "format": "list" | "points"
+               "format": "lists" | "points"
                    the format of the data to be returned
                    list returns a dict of labelled lists of data
                    points returns a list of labelled dict data points
@@ -345,7 +343,7 @@ class Data:
                             return returnArray
                         #                             print(len(returnArray))
                         except:
-                            traceback.print_exc()
+                            pass
                     except:
                         # if at this point, it should be a string index
                         for item in data:
@@ -418,7 +416,7 @@ class Data:
                 defaults[key] = value
 
         if not self.formattedData == None:
-            if defaults["format"] == "list":
+            if defaults["format"] == "list" or defaults["format"] == "lists":
                 if isinstance(self.formattedData, dict):
                     return self.formattedData
             else:  # format is the default, points

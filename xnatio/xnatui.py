@@ -1,11 +1,10 @@
-import requests
 import grequests
+import requests
 import ipywidgets as widgets
 import json
 import getpass
-import traceback
 
-from xnatio import SubjectData
+from xnatio.subjectdata import SubjectData
 
 
 class IncorrectLoginException(Exception):
@@ -54,9 +53,12 @@ class XnatUI:
                 the session id
         """
         secure = self.options["force_ssl"]
-        response = requests.post(self.server + "/data/JSESSIONID",
-                                 auth=requests.auth.HTTPBasicAuth(username, password),
-                                 verify=secure)
+        try:
+            response = requests.post(self.server + "/data/JSESSIONID",
+                                     auth=requests.auth.HTTPBasicAuth(username, password),
+                                     verify=secure)
+        except requests.exceptions.SSLError:
+            raise requests.exceptions.SSLError("SSL connection failed. To turn off SSL, do self.set_option('force_ssl', False)")
 
         #         print(vars(response))
         if (response.status_code == 200):
@@ -80,12 +82,36 @@ class XnatUI:
         password = getpass.getpass("Password: ")
 
         try:
-            return self.get_login(username, password)
+            x = self.get_login(username, password)
             print("Success")
+            return x
         except IncorrectLoginException:
-            #             traceback.print_exc()
             # if login fails, try again
             return self.display_login_ui()
+        except requests.exceptions.SSLError:
+            def get_yn():
+                yn = input("SSL connection failed. Dangerously disable SSL? (y/n) ")
+                if yn == 'y':
+                    return True
+                elif yn == 'n':
+                    return False
+                else:
+                    return get_yn()
+
+            if get_yn():
+                self.options['force_ssl'] = False
+                try:
+                    x = self.get_login(username, password)
+                    print("Success")
+                    return x
+                except IncorrectLoginException:
+                    #             traceback.print_exc()
+                    # if login fails, try again
+                    return self.display_login_ui()
+            else:
+                return None
+        except ConnectionError:
+            print("Server cannot be reached")
 
     def get_available_projects(self):
         """
@@ -267,7 +293,6 @@ class XnatUI:
                 try:
                     subjects = result.json()["ResultSet"]["Result"]
                 except:
-                    traceback.print_exc()
                     pass
                 else:
                     self.fetchedProjectIds.append(projectsToGet[count])
@@ -286,8 +311,7 @@ class XnatUI:
             -------
             dict [str:[str:[str]]]
         """
-
-        if not self.experimentTypes == None:
+        if not self.experimentTypes is None:
             return self.experimentTypes
 
         secure = self.options["force_ssl"]
@@ -348,7 +372,7 @@ class XnatUI:
             -------
             ipywidget
         """
-        if self.experimentTypes == None or len(self.experimentTypes) == 0:
+        if self.experimentTypes is None or len(self.experimentTypes) == 0:
             self.get_available_experiments()
 
         groupIds = {}
@@ -427,15 +451,18 @@ class XnatUI:
             None
         """
 
+        #runs only if needed
+        self.get_available_experiments(options)
+
         secure = self.options["force_ssl"]
         try:
             secure = options["force_ssl"]
-        except:
+        except Exception:
             pass
 
         experiments = []
         experimentSubjects = self.experimentTypes[experimentCode]
-        if subjectIds == None:
+        if subjectIds is None:
             subjectIds = self.subjectData.get_selected_subject_ids()
         for subject in subjectIds:
             try:
@@ -453,9 +480,6 @@ class XnatUI:
 
         result = grequests.map(requests, exception_handler=exceptionHandler)
 
-        #     print("woo")
-        #     print(result)
-        #     print(result[0]._content)
 
         for exResult in result:
             try:
@@ -469,21 +493,54 @@ class XnatUI:
 
         print("Done getting experiments")
 
-# temp
-# xnat = XnatUI("https://cnda-dev-aidan1.nrg.mir", {"force_ssl":False})
-# # xnat.display_login_ui(); # ';' will suppress output
-# xnat.get_login('aidan','')
-# # xnat.get_available_projects_ui()
-# xnat.select_project('DIAN_011')
-# xnat.fetch_subjects().calculate_groups()
-# xnat.fetch_subjects().add_group({'ID':'CNDA0516'}, "CNDA0516")
-# xnat.get_available_experiments_ui()
-# # xnat.subjectData.groupsDisplayContainer
-# # subjects = xnat.subjectData.add_group({'insert_user':['dan']})[-1]["subjects"]
-# # subjectIds = []
-# # for subject in subjects:
-# #     subjectIds.append(subject["ID"])
-# # print(subjectIds)
-# # xnat.get_available_experiments()
-# xnat.get_available_experiments_ui()
+    def select_groups_ui(self):
+        """
+            This method is just shorthand for self.get_subjects().select_groups_ui()
+        """
+        return self.get_subjects().select_groups_ui()
+
+    def data_ui(self):
+        """
+            This method is just shorthand for self.get_subjects().data_ui()
+        """
+        return self.get_subjects().data_ui()
+
+    def get_data(self, options=None):
+        """
+            This method is just shorthand for self.get_subjects().get_data(options)
+        """
+        return self.get_subjects().get_data(options)
+
+    def set_option(self, key, value):
+        """
+            Sets an option
+
+            Parameters
+            ----------
+            key: string
+                the key (or name) of the object to be set
+
+            value: Any
+                the value to be attributed to the key
+
+            Return
+            ------
+            None
+        """
+        self.options[key] = value
+
+    def set_options(self, options):
+        """
+            Sets multiple options
+
+            A function to set multiple options
+
+            Parameters
+            ----------
+            options: dict
+                a dict of options in form "key":"value" to be set
+        """
+
+        if isinstance(options, dict):
+            self.options.update(options)
 

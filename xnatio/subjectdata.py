@@ -1,7 +1,7 @@
 import ipywidgets as widgets
 import matplotlib.pyplot as plt
 
-from xnatio import Data
+from xnatio.data import Data
 
 
 class SubjectData(Data):
@@ -42,6 +42,7 @@ class SubjectData(Data):
             -------
             SubjectData
                 The SubjectData object
+
         """
 
         self.subjectGroups = []
@@ -99,6 +100,8 @@ class SubjectData(Data):
             Return
             ------
             None
+
+
         """
 
         localOptions = {}
@@ -182,14 +185,15 @@ class SubjectData(Data):
             -------
              list [[string:Any]]
                 A list of all subject groups
+
         """
         idField = self.options["id_field"]
         try:
             idField = options["id_field"]
         except:
             pass
-        filterGroups = {idFeild: subjects}
-        return self.add_group()
+        filterGroups = {idField: subjects}
+        return self.add_group(filterGroups, title)
 
     def add_group(self, filterGroups, title=None):
         """
@@ -214,6 +218,7 @@ class SubjectData(Data):
             -------
             list [[string:Any]]
                 A list of all subject groups
+
         """
 
         def filterGroupsDescription(filterGroups, delim="; "):
@@ -317,7 +322,7 @@ class SubjectData(Data):
 
         return filteredSubjects
 
-    def add_group_ui(self):
+    def add_groups_ui(self):
         """
             Returns the UI for creating new groups
 
@@ -325,6 +330,7 @@ class SubjectData(Data):
             -------
             widgets.VBox
                 a widget containing the UI
+
         """
 
         def getGroupContainer(group):
@@ -447,6 +453,7 @@ class SubjectData(Data):
             Returns
             -------
             list [[string:Any]]
+
         """
         subjectIds = []
         for i in range(len(self.groupsDisplayContainer.children)):
@@ -463,7 +470,6 @@ class SubjectData(Data):
         return self.groupsDisplayContainer
 
     def get_data(self, options=None):
-
         # todo: test this method
 
         """
@@ -486,16 +492,23 @@ class SubjectData(Data):
             -------
             list or dict
                 (see options > "format")
+
         """
-        localOptions = {}.update(self.options)
+
+
+        localOptions = {}
+        localOptions.update(self.options)
         if isinstance(options, dict):
             localOptions.update(options)
+
 
         subjectIds = self.get_selected_subject_ids()
 
         allData = self.data
 
-        self.data = [x for x in allData if x[options['id_field']] in subjectIds] #filter the selected subjects
+        idField = localOptions['id_field']
+
+        self.data = [x for x in allData if x[idField] in subjectIds] #filter the selected subjects
 
         out = Data.get_data(self, options)
 
