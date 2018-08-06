@@ -13,6 +13,8 @@ Welcome to xnatio's documentation!
    installation
    docindex
    ui_example
+   script_example
+
 
 Indices and tables
 ==================
