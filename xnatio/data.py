@@ -36,8 +36,8 @@ class Data:
             "parse": ["int", "float", "date"]
         }
         if isinstance(options, dict):
-            for key, value in options.items():
-                defaults[key] = value
+            defaults.update(options)
+
         self.options = defaults
 
     @staticmethod
@@ -514,6 +514,7 @@ class Data:
             ----------
             exp: str
                 the expression to caluate the column
+                note: variables to be substituted must be wrapped in backticks (`)
 
             subs: dict
                 substitutions to be made in the expression
@@ -527,7 +528,15 @@ class Data:
         rule = exp
 
         for var, sub in subs.items():
+            # add backticks
+            if var[0] != '`':
+                var = '`' + var
+
+            if var[-1] != '`':
+                var = var + '`'
+
             # this code is a little sketchy
+
             rule = rule.replace(var, 'point["' + sub + '"]')
 
         self.columns[name] = rule
@@ -537,3 +546,92 @@ class Data:
         return self.columns
 
     # todo:: UI for adding columns
+    def add_column_ui(self):
+        """
+            Returns the UI for defining new calculated columns
+
+            Returns
+            -------
+            widgets.VBox
+        """
+        container = widgets.VBox()
+        subsContainer = widgets.VBox()
+        colsContainer = widgets.VBox()
+        expContainer = widgets.HBox()
+        addColButton = widgets.Button(description="Add Column")
+        addSubButton = widgets.Button(description="Add Variable")
+
+        def add_sub(e=None):
+            sub = widgets.HBox()
+            nameField = widgets.Text(placeholder="name")
+            options = []
+
+            for name, _ in self.paths.items():
+                options.append(name)
+
+            for name, _ in self.columns.items():
+                options.append(name)
+
+            dd = widgets.Dropdown(options = options, title = " = ")
+
+            sub.children = (nameField, dd)
+
+            c = subsContainer.children
+            c += (sub,)
+            subsContainer.children = c
+
+        def setup():
+            # setup expContainer
+            expContainer.children = (
+                widgets.Text(placeholder="Column Name"),
+                widgets.Text(placeholder="Expression")
+            )
+
+            # setup colsContainer
+            cols = []
+
+            for name, rule in self.columns.items():
+                cols.append(widgets.HTML(value=name + " = " + rule))
+
+            colsContainer.children = cols
+
+            # setup subsContainer
+            subsContainer.children = []
+            add_sub()
+
+            # setup container
+            container.children = (
+                widgets.HTML(value="Define variables below that will be substituted into the expression."),
+                subsContainer,
+                addSubButton,
+                widgets.HTML(value="Enter the name of the new column and the expression that defines it. Variables defined above must be escaped with backticks (`)."),
+                expContainer,
+                addColButton,
+                colsContainer
+            )
+
+        def add_col(e=None):
+            name = expContainer.children[0].value
+            exp = expContainer.children[1].value
+
+            subs = {}
+
+
+            for sub in subsContainer.children:
+                var = sub.children[0].value
+
+                print(var)
+                val = sub.children[1].value
+
+                subs[var] = val
+
+            self.add_column(name, exp, subs)
+
+            setup()
+
+        setup()
+
+        addColButton.on_click(add_col)
+        addSubButton.on_click(add_sub)
+
+        return container

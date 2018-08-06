@@ -56,11 +56,7 @@ class SubjectData(Data):
         }
 
         if isinstance(options, dict):
-            for key, value in defaults.items():
-                try:
-                    defaults[key] = options[key]
-                except:
-                    pass
+            defaults.update(options)
 
         Data.__init__(self, [], defaults)
 

@@ -11,14 +11,15 @@ class IncorrectLoginException(Exception):
     pass
 
 
-class XnatUI:
+class XnatUI(SubjectData):
     def __init__(self, server, options=None):
+
         self.JESSIONID = None
         self.projects = []
         self.projectIds = []
         self.availableProjectsUI = None
         self.fetchedProjectIds = []
-        self.subjectData = None
+        self.data = None
         self.selectedProjectIds = []
         self.experimentTypes = None
         self.experimentContainer = None
@@ -28,12 +29,14 @@ class XnatUI:
         else:
             self.server = server
         defaults = {
-            "force_ssl": True
+            "force_ssl": True,
+            "id_field": "ID"
         }
 
         if isinstance(options, dict):
             defaults.update(options)
-        self.options = defaults
+
+        SubjectData.__init__(self, defaults)
 
     def __str__(self):
         print("XNAT instance running at " + self.server)
@@ -244,6 +247,8 @@ class XnatUI:
 
         self.experimentTypes = None
 
+        self.get_subjects()
+
         return self.selectedProjectIds
 
     def get_selected_projects(self):
@@ -285,8 +290,8 @@ class XnatUI:
 
         results = grequests.map(requests)
 
-        if self.subjectData == None:
-            self.subjectData = SubjectData({"id_field": "ID"})
+        # if self.data == None:
+        #     self.data = SubjectData({"id_field": "ID"})
 
         for count, result in enumerate(results):
             if result.status_code == 200:
@@ -299,9 +304,9 @@ class XnatUI:
                     for i in range(len(subjects)):
                         subjects[i]["project"] = projectsToGet[count]
                         subjects[i]["experiments"] = {}
-                        self.subjectData.add_subject(subjects[i])
+                        self.add_subject(subjects[i])
 
-        return self.subjectData
+        return self
 
     def get_available_experiments(self, options=None):
         """
@@ -376,7 +381,7 @@ class XnatUI:
             self.get_available_experiments()
 
         groupIds = {}
-        for subjectGroup in self.subjectData.subjectGroups:
+        for subjectGroup in self.subjectGroups:
             groupIds[subjectGroup["title"]] = []
             for subject in subjectGroup["subjects"]:
                 groupIds[subjectGroup["title"]].append(subject["ID"])
@@ -398,7 +403,7 @@ class XnatUI:
         options = []
         for xsi, subjectId in self.experimentTypes.items():
             title = xsi + " ("
-            for subjectGroup in self.subjectData.subjectGroups:
+            for subjectGroup in self.subjectGroups:
                 count = 0
                 group = subjectGroup["title"]
                 try:
@@ -432,7 +437,7 @@ class XnatUI:
         codeStr = self.experimentContainer.children[0].value
         endIndex = codeStr.index(" (")
         experimentCode = codeStr[0:endIndex]
-        return self.get_experiment(experimentCode, self.subjectData.get_selected_subject_ids())
+        return self.get_experiment(experimentCode, self.get_selected_subject_ids())
 
     def get_experiment(self, experimentCode, subjectIds=None, options=None):
         """
@@ -463,7 +468,7 @@ class XnatUI:
         experiments = []
         experimentSubjects = self.experimentTypes[experimentCode]
         if subjectIds is None:
-            subjectIds = self.subjectData.get_selected_subject_ids()
+            subjectIds = self.get_selected_subject_ids()
         for subject in subjectIds:
             try:
                 experiments += experimentSubjects[subject]
@@ -488,28 +493,10 @@ class XnatUI:
                 pass
             else:
                 exSubjectId = exDict['data_fields']['subject_ID']
-                self.subjectData.add_subject({"ID": exSubjectId, "experiments": {exDict['meta']['xsi:type']: [exDict]}},
-                                             options={'add_data_mode': 'merge', 'merge_priority': 'old'})
+                self.add_subject({"ID": exSubjectId, "experiments": {exDict['meta']['xsi:type']: [exDict]}},
+                                      options={'add_data_mode': 'merge', 'merge_priority': 'old'})
 
         print("Done getting experiments")
-
-    def select_groups_ui(self):
-        """
-            This method is just shorthand for self.get_subjects().select_groups_ui()
-        """
-        return self.get_subjects().select_groups_ui()
-
-    def data_ui(self):
-        """
-            This method is just shorthand for self.get_subjects().data_ui()
-        """
-        return self.get_subjects().data_ui()
-
-    def get_data(self, options=None):
-        """
-            This method is just shorthand for self.get_subjects().get_data(options)
-        """
-        return self.get_subjects().get_data(options)
 
     def set_option(self, key, value):
         """
