@@ -171,33 +171,33 @@ class XnatUI(SubjectData):
             dd = widgets.Dropdown(options=projectIds)
             addButton = widgets.Button(description="Add")
 
-            def remove(projectId, b):
-                self.availableProjectsUI.children[0].children = tuple(
-                    project
-                    for project in self.availableProjectsUI.children[0].children
-                    if not project.children[1].value == projectId
-                )
-                try:
-                    self.selectedProjectIds.remove(projectId)
-                except:
-                    pass
+            # def remove(projectId, b):
+            #     self.availableProjectsUI.children[0].children = tuple(
+            #         project
+            #         for project in self.availableProjectsUI.children[0].children
+            #         if not project.children[1].value == projectId
+            #     )
+            #     try:
+            #         self.selectedProjectIds.remove(projectId)
+            #     except:
+            #         pass
 
             def add(b):
                 # add to the data
                 currentId = dd.value
                 if not currentId in self.selectedProjectIds:
-                    self.selectedProjectIds.append(currentId)
-
+                    self.select_project(currentId)
                     # add to the UI
 
                     title = widgets.HTML(value=currentId)
-                    button = widgets.Button(description="Remove")
+                    # button = widgets.Button(description="Remove")
 
-                    button.on_click(lambda b: remove(currentId, b))
+                    # button.on_click(lambda b: remove(currentId, b))
 
                     childrenArray = self.availableProjectsUI.children[0].children
                     childrenArray = childrenArray + (widgets.HBox(children=[
-                        button, title
+                        # button,
+                        title
                     ]),)
 
                     self.availableProjectsUI.children[0].children = childrenArray
@@ -223,9 +223,12 @@ class XnatUI(SubjectData):
             list
                 a list of the IDs of all selected projects
         """
-        self.selectedProjectIds.append(project)
+        if not project in self.selectedProjectIds:
+            self.selectedProjectIds.append(project)
 
-        self.experimentTypes = None
+            self.experimentTypes = None
+
+            self.get_subjects()
 
         return self.selectedProjectIds
 
@@ -243,7 +246,9 @@ class XnatUI(SubjectData):
             list
                 a list of the IDs of all selected projects
         """
-        self.selectedProjectIds += projects
+        for project in projects:
+            if not project in self.selectedProjectIds:
+                self.selectedProjectIds.append(project)
 
         self.experimentTypes = None
 
