@@ -503,36 +503,3 @@ class XnatUI(SubjectData):
 
         print("Done getting experiments")
 
-    def set_option(self, key, value):
-        """
-            Sets an option
-
-            Parameters
-            ----------
-            key: string
-                the key (or name) of the object to be set
-
-            value: Any
-                the value to be attributed to the key
-
-            Return
-            ------
-            None
-        """
-        self.options[key] = value
-
-    def set_options(self, options):
-        """
-            Sets multiple options
-
-            A function to set multiple options
-
-            Parameters
-            ----------
-            options: dict
-                a dict of options in form "key":"value" to be set
-        """
-
-        if isinstance(options, dict):
-            self.options.update(options)
-
