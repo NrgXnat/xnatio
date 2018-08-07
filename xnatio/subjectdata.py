@@ -262,8 +262,8 @@ class SubjectData(Data):
                                         layout=widgets.Layout(width='97%', height='40px'))
             checkboxes.append(checkbox)
 
-        if (self.groupsDisplayContainer == None):
-            self.groupsDisplayContainer = widgets.VBox()
+        if self.groupsDisplayContainer is None:
+            self.add_groups_ui()
 
         self.groupsDisplayContainer.children = checkboxes
 
@@ -462,7 +462,42 @@ class SubjectData(Data):
 
         return subjectIds
 
+
+
+    def select_group(self, title):
+        """
+            Selects a certain group by its title (case-sensitive)
+
+
+        """
+        return self.select_group_helper(title, True)
+
+    def unselect_group(self, title):
+        """
+            Unselects a certain group by its title (case-sensitive)
+        """
+        return self.select_group_helper(title, False)
+
+    def select_group_helper(self, title, select):
+        """
+            Helper
+        """
+
+        for index, group in enumerate(self.subjectGroups):
+            if group['title'] == title:
+
+                if self.groupsDisplayContainer is None:
+                    self.add_groups_ui()
+
+                self.groupsDisplayContainer.children[index].value = select
+                return True
+            
+        return False
+
     def select_groups_ui(self):
+        """
+            Gets the UI for selecting which of the previously generated groups to use
+        """
         return self.groupsDisplayContainer
 
     def get_data(self, options=None):
