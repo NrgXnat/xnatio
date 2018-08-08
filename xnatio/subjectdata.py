@@ -468,19 +468,55 @@ class SubjectData(Data):
         """
             Selects a certain group by its title (case-sensitive)
 
+            Parameters
+            ----------
 
+            title: str
+                the title of the group to be selected
+
+            Returns
+            -------
+            bool
+                whether the provided title was found
         """
         return self.select_group_helper(title, True)
 
     def unselect_group(self, title):
         """
             Unselects a certain group by its title (case-sensitive)
+
+            note: unselecting a group does not mean it will be deleted
+
+            Parameters
+            ----------
+
+            title: str
+                the title of the group to be unselected
+
+            Returns
+            -------
+            bool
+                whether the provided title was found
         """
         return self.select_group_helper(title, False)
 
     def select_group_helper(self, title, select):
         """
-            Helper
+            Helper function for select_group and unselect_group
+
+            Parameters
+            ----------
+
+            title: str
+                the title of the group
+
+            select: bool
+                whether to select (True) or unselect (False) the group
+
+            Returns
+            -------
+            bool
+                whether the provided title was found
         """
 
         for index, group in enumerate(self.subjectGroups):
@@ -491,7 +527,7 @@ class SubjectData(Data):
 
                 self.groupsDisplayContainer.children[index].value = select
                 return True
-            
+
         return False
 
     def select_groups_ui(self):

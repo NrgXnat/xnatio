@@ -16,9 +16,6 @@ Welcome to xnatio's documentation!
    script_example
 
 
-Indices and tables
-==================
-
+Index
+=====
 * :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

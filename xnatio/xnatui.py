@@ -113,8 +113,8 @@ class XnatUI(SubjectData):
                     return self.display_login_ui()
             else:
                 return None
-        except ConnectionError:
-            print("Server cannot be reached")
+        except requests.exceptions.ConnectionError:
+            print("Provided server cannot be reached")
 
     def get_available_projects(self):
         """
