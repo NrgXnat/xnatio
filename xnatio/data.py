@@ -450,7 +450,7 @@ class Data:
                 if oldNumFailed == numFailed:
                     break
 
-        if defaults["format"] == "list":
+        if defaults["format"] == "list" or defaults["format"] == "lists":
             dataArrays = {}
             # first, get all the
             for point in dataPoints:
