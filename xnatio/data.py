@@ -1,6 +1,6 @@
 import ipywidgets as widgets
 from dateutil import parser as dateParser
-
+import datetime
 
 class Data:
     def __init__(self, data, options=None):
@@ -333,19 +333,21 @@ class Data:
                         if (int(key) >= 0):
                             # somewhat sketchy code here basically is basically just forcing the except to run
                             raise Exception()
-                        try:
-                            for d in data:
-                                try:
-                                    returnArray += getDataPointsHelper(d, values, name)
-                                except:
-                                    pass
-                            # if were here, theres only one index, so just return it
-                            return returnArray
+
+                        #it's an array with a negative index: This means treat all children as equals; return data from all of them
+                        for d in data:
+                            try:
+                                returnArray += getDataPointsHelper(d, values, name)
+                            except:
+                                pass
+                        # if were here, theres only one index, so just return it
+                        return returnArray
                         #                             print(len(returnArray))
-                        except:
-                            pass
                     except:
                         # if at this point, it should be a string index
+                        # it's still an array, but each child has some sort of identifier
+
+                        #code to add the item if it has the identifier (that's the reason for all the try's) and the identifier equals the index
                         for item in data:
                             try:
                                 if item['field'] == key:
@@ -363,18 +365,16 @@ class Data:
 
                 elif isinstance(data, dict):
                     try:
-                        if values == None:
+                        if values is None:
+                            # value is None means there are no further indices: just return the data point
                             returnArray += [{name + "/" + key: parse(data[key])}]
                         else:
                             try:
-                                #                                 print(str(key) + " " + str(values))
+                                # if data has the key, add the data point to the array (recursively)
                                 returnArray += getDataPointsHelper(data[key], values, name + "/" + key)
                             except:
-                                #                                 returnArray.append(dataDataPointsHelper)
-                                #                                 returnArray.append({key: None})
                                 pass
                     except:
-                        #                         traceback.print_exc()
                         returnArray.append({name + "/" + key: None})
 
             return combineData(returnArray)
@@ -391,12 +391,14 @@ class Data:
             return cartesianProductMany(data)
 
         def cartesianProductMany(sets):
+            # calculates the "cartesian product"  when n > 2
             a = sets[0]
             for i in range(1, len(sets)):
                 a = cartesianProduct(a, sets[i])
             return a
 
         def cartesianProduct(a, b):
+            #not really a cartesian product, but analogous I guess
             #     print(a)
             #     print(b)
             points = []
@@ -415,7 +417,7 @@ class Data:
             for key, value in options.items():
                 defaults[key] = value
 
-        if not self.formattedData == None:
+        if not self.formattedData is None:
             if defaults["format"] == "list" or defaults["format"] == "lists":
                 if isinstance(self.formattedData, dict):
                     return self.formattedData
@@ -529,15 +531,18 @@ class Data:
 
         for var, sub in subs.items():
             # add backticks
-            if var[0] != '`':
-                var = '`' + var
 
-            if var[-1] != '`':
-                var = var + '`'
+            if len(var) > 0:
 
-            # this code is a little sketchy
+                if var[0] != '`':
+                    var = '`' + var
 
-            rule = rule.replace(var, 'point["' + sub + '"]')
+                if var[-1] != '`':
+                    var = var + '`'
+
+                # this code is a little sketchy
+
+                rule = rule.replace(var, 'point["' + sub + '"]')
 
         self.columns[name] = rule
 

@@ -3,6 +3,8 @@ import requests
 import ipywidgets as widgets
 import json
 import getpass
+import re
+
 
 from xnatio.subjectdata import SubjectData
 
@@ -37,9 +39,6 @@ class XnatUI(SubjectData):
             defaults.update(options)
 
         SubjectData.__init__(self, defaults)
-
-    def __str__(self):
-        print("XNAT instance running at " + self.server)
 
     def get_login(self, username, password):
         """
@@ -238,7 +237,7 @@ class XnatUI(SubjectData):
 
             Parameters
             ----------
-            projecto: list
+            projects: list
                 the list of the IDs of the projects to be selected
 
             Returns
@@ -253,6 +252,32 @@ class XnatUI(SubjectData):
         self.experimentTypes = None
 
         self.get_subjects()
+
+        return self.selectedProjectIds
+
+    def select_projects_regex(self, regex):
+        """
+            Selects projects whose IDs match a regular expression
+
+            Parameters
+            ----------
+            regex: pattern
+                the regular expression for selecting projects
+
+            Returns
+            -------
+            list
+                a list of the IDs of all selected projects
+        """
+        projects = self.get_available_projects()
+
+
+        #possible improvement: re.compile
+        for project in projects:
+            if not re.match(regex, project) is None:
+                self.selectedProjectIds.append(project)
+
+        self.experimentTypes = None
 
         return self.selectedProjectIds
 
@@ -282,6 +307,7 @@ class XnatUI(SubjectData):
             pass
 
         projectsToGet = [project for project in self.selectedProjectIds if not project in self.fetchedProjectIds]
+
         requests = (grequests.get(self.server + "/data/projects/" + project + "/subjects",
                                   headers={"Cookie": "JSESSIONID=" + self.JSESSIONID},
                                   params={
@@ -310,6 +336,8 @@ class XnatUI(SubjectData):
                         subjects[i]["project"] = projectsToGet[count]
                         subjects[i]["experiments"] = {}
                         self.add_subject(subjects[i])
+
+        self.add_group({}, "All Subjects")
 
         return self
 
@@ -396,7 +424,7 @@ class XnatUI(SubjectData):
         for expId, subjects in self.experimentTypes.items():
             expGroupCount[expId] = {}
             for groupId, subjectIds in groupIds.items():
-                expGroupCount[expId][groupId] = 0;
+                expGroupCount[expId][groupId] = 0
                 for subjectId in subjectIds:
                     try:
                         count = len(self.experimentTypes[expId][subjectId])

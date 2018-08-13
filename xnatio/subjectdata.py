@@ -223,10 +223,14 @@ class SubjectData(Data):
             for key, values in filterGroups.items():
                 count += 1
                 string += key + ": "
-                for i in range(len(values)):
-                    if not i == 0:
-                        string += ", "
-                    string += values[i]
+                if isinstance(values, list):
+                    for i in range(len(values)):
+                        if not i == 0:
+                            string += ", "
+                        string += values[i]
+                else:
+                    string += values
+
                 if not count == len(filterGroups):
                     string += delim
             return string
@@ -236,7 +240,16 @@ class SubjectData(Data):
 
         newSubjectGroup = {"title": title, "filterGroups": filterGroups,
                            "subjects": SubjectData.subjects_in_filter_groups(self.data, filterGroups)}
-        self.subjectGroups.append(newSubjectGroup)
+
+        groupHasTitle = False
+
+        for index, potentialGroup in enumerate(self.subjectGroups):
+            if potentialGroup["title"] == title:
+                self.subjectGroups[index] = newSubjectGroup
+                groupHasTitle = True
+
+        if not groupHasTitle:
+            self.subjectGroups.append(newSubjectGroup)
 
         newGroupLabel = widgets.HTML(value="<b>" + newSubjectGroup["title"] + ":</b><br>&emsp;" +
                                            str(len(newSubjectGroup["subjects"])) + " subjects" +
@@ -269,6 +282,7 @@ class SubjectData(Data):
 
         return self.subjectGroups
 
+    @staticmethod
     def subjects_in_filter_groups(subjects, filterGroups):
         """
             Static method that returns a list of subjects (not just id's) that satisfy the filterGroups
@@ -315,8 +329,9 @@ class SubjectData(Data):
             for subject in subjects:
                 if subjectInGroups(subject, filterGroups):
                     filteredSubjects.append(subject)
-
-        return filteredSubjects
+            return filteredSubjects
+        else:
+            return subjects
 
     def add_groups_ui(self):
         """
