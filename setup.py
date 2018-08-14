@@ -4,7 +4,7 @@ with open ("README.md", "r") as readme:
     long_description = readme.read()
 
 setuptools.setup(name='xnatio',
-      version='0.1.0',
+      version='0.1.2',
       description='A library for gathering data from the XNAT database',
       long_description=long_description,
       long_description_content_type="text/markdown",
