@@ -62,8 +62,7 @@ class XnatUI(SubjectData):
         except requests.exceptions.SSLError:
             raise requests.exceptions.SSLError("SSL connection failed. To turn off SSL, do self.set_option('force_ssl', False)")
 
-        #         print(vars(response))
-        if (response.status_code == 200):
+        if response.status_code == 200:
             cookieString = response.headers["Set-Cookie"]
             indexFirst = cookieString.index("JSESSIONID=") + 11
             indexLast = cookieString.index(";", indexFirst)
@@ -107,7 +106,6 @@ class XnatUI(SubjectData):
                     print("Success")
                     return x
                 except IncorrectLoginException:
-                    #             traceback.print_exc()
                     # if login fails, try again
                     return self.display_login_ui()
             else:

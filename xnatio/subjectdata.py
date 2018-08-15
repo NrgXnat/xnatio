@@ -140,7 +140,6 @@ class SubjectData(Data):
                         if newSubjectId == oldSubjectId:
                             def merge(new, old):
                                 for key, value in new.items():
-                                    #                                     print(key)
                                     try:
                                         oldValue = old[key]
                                     except:
@@ -218,6 +217,9 @@ class SubjectData(Data):
         """
 
         def filterGroupsDescription(filterGroups, delim="; "):
+            # returns the description of filter groups based on what properties are used
+            # and which values for those properties are accepted
+
             string = ""
             count = 0
             for key, values in filterGroups.items():
@@ -304,18 +306,25 @@ class SubjectData(Data):
         """
 
         def subjectInKeyValues(subject, key, values):
+            # sees if subject[key] exists and has one of the accepted values
             if (len(values) > 0):
-                for value in values:
+                try:
                     val = subject[key]
+                except:
+                    return False
+                else:
                     if val == "":
                         val = "no value"
-                    if val == value:
-                        return True
-                return False
+                    for value in values:
+                        if val == value:
+                            return True
+                    return False
             else:
                 return True
 
         def subjectInGroups(subject, groups):
+            # sees if the subject satisfies the requirements of the groups
+
             for key, values in groups.items():
                 if isinstance(values, list):
                     if not subjectInKeyValues(subject, key, values):
@@ -392,7 +401,6 @@ class SubjectData(Data):
                         group = "no value"
                     try:
                         num = float(group)
-                    #                         print(field + ": " + group)
                     except:
                         try:
                             groups[field][group] += 1
@@ -419,8 +427,6 @@ class SubjectData(Data):
 
         for fieldId in toDelete:
             del groups[fieldId]
-
-        #         print(groups)
 
         filteredSubjects = {}
 

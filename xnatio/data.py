@@ -103,7 +103,11 @@ class Data:
         fullPathContainer.children = [pathContainer, addButton, removeButton]
 
         def getIndices(obj):
+            # gets the indices for an object
+
             def childrenToIndices(children):
+                # for a list of children, get the indices
+
                 childrenDict = {}
                 for index, child in enumerate(children):
                     childId = ""
@@ -113,12 +117,15 @@ class Data:
                         try:
                             childId = "" + child["data_fields"]["name"]
                         except:
-                            raise Error("children cannot be converted to dict")
+                            raise Exception("children cannot be converted to dict")
+
                     childrenDict[childId] = [childId]
 
                 return childrenDict
 
             def formatIfFinal(obj, index):
+                # if index contains more sub-indices, append a / character to signify that
+
                 try:
                     item = obj[index]
                 except:
@@ -153,14 +160,21 @@ class Data:
                             # sees if the index already exists
                             x = indices[childFakeIndex]
                         except:
+                            # if the index doesn't already exist, add it
                             indices[childFakeIndex] = [count - len(obj)] + childIndex
                 return indices
             else:
                 raise Exception("no more indices")
 
         def addPathWidget(b=None):
+            # adds a new dropdown to the UI
+            # triggered when the add button is pressed
+
             def dataFromIndices(data, indices):
-                #     print(indices)
+                # gets the data from a single set of indices (unlike the get_data function,
+                # which gets and combines data from different paths at once
+                # this function must exist, ald cannot be replaced by get_data
+
                 try:
                     currIndex = indices[0]
                 except:
@@ -222,6 +236,9 @@ class Data:
                     pathContainer.children = c
 
         def removePathWidget(b=None):
+            # removes the current path widget
+            # triggered when the remove button is pressed
+
             if (len(pathContainer.children) > 1):
                 c = pathContainer.children
                 c = c[0:-1]
@@ -234,20 +251,6 @@ class Data:
         addPathWidget()
 
         return fullPathContainer
-
-    #     def get_data_better(self, prettyPath, options=None):
-    #         """
-    #             Does get_data except with the pretty path itself, which should be more robust
-
-    #             Parameters
-    #             ----------
-
-    #             prettyPath: dict
-    #                 the path
-
-    #             options: dict
-    #                 just look at the other docs for this
-    #         """
 
     def get_data(self, options=None):
         """
@@ -272,14 +275,25 @@ class Data:
                 (see options > "format")
         """
 
+        # note: It's probably a bad idea to mess with this method
+
         def combinePaths(paths):
-            #     print(paths)
-            if (len(paths) == 1 and len(paths[0]) == 0):
+            # combines paths of list form into one path of dict form
+            # The end result is a tree, where each node is a dict of indices that point to the next node,
+            # until the end, which is signified by a dict of form {"index":None}
+
+            if len(paths) == 1 and len(paths[0]) == 0:
+                # end case/base case
                 return None
+
+            # generate a dict of possible indices, then make it into a combined path
+            # by recursively calling the combinePaths function
             possibleIndices = {}
             for path in paths:
                 currIndex = path[0]
                 try:
+                    # if the current index is negative, just set it to -1
+                    # I don't know why this happens, and it seems unnecessary
                     if int(currIndex) < 0:
                         currIndex = -1
                 except:
@@ -299,16 +313,23 @@ class Data:
                 return pathsDict
 
         def getDataPointsHelper(data, combinedPaths, name=""):
+            # the recursive function that actually gets the data
 
             def parse(val):
-                # only parse strings
+                # attempts to parse values based on what types the user wants to parse
+
                 if isinstance(val, str):
+                    # only parse if the value is a string
+
                     try:
                         if "int" in self.options["parse"]:
+                            # if the 'int' option is selected, try to return an int
                             return int(val)
                         else:
                             raise Exception()
                     except:
+                        # control is passed to the except block if the parsing fails or the option is not selected
+
                         try:
                             if "float" in self.options["parse"]:
                                 return float(val)
@@ -321,7 +342,6 @@ class Data:
                                 else:
                                     raise Exception()
                             except:
-                                #                             traceback.print_exc()
                                 return val
                 else:
                     return val
@@ -334,7 +354,9 @@ class Data:
                             # somewhat sketchy code here basically is basically just forcing the except to run
                             raise Exception()
 
-                        #it's an array with a negative index: This means treat all children as equals; return data from all of them
+                        # it's an array with a negative index:
+                        # This means treat all children as equals; return data from all of them
+
                         for d in data:
                             try:
                                 returnArray += getDataPointsHelper(d, values, name)
@@ -342,12 +364,13 @@ class Data:
                                 pass
                         # if were here, theres only one index, so just return it
                         return returnArray
-                        #                             print(len(returnArray))
+
                     except:
                         # if at this point, it should be a string index
                         # it's still an array, but each child has some sort of identifier
 
-                        #code to add the item if it has the identifier (that's the reason for all the try's) and the identifier equals the index
+                        # code to add the item if it has the identifier (that's the reason for all the try's)
+                        # and the identifier equals the index
                         for item in data:
                             try:
                                 if item['field'] == key:
@@ -380,27 +403,30 @@ class Data:
             return combineData(returnArray)
 
         def combineData(data):
+            # cleans the data then executes cartesian product many
+
             for i in range(len(data)):
                 if data[i] == None:
                     data[i] = {"None": None}
                 if not isinstance(data[i], list):
-                    #             print("in")
+
                     data[i] = [data[i]]
-            #     print("data:")
-            #             print(data)
+
             return cartesianProductMany(data)
 
         def cartesianProductMany(sets):
             # calculates the "cartesian product"  when n > 2
+            # iteratively performs cartesian product
+
             a = sets[0]
             for i in range(1, len(sets)):
                 a = cartesianProduct(a, sets[i])
             return a
 
         def cartesianProduct(a, b):
-            #not really a cartesian product, but analogous I guess
-            #     print(a)
-            #     print(b)
+            # not really a cartesian product, but analogous I guess
+            # takes two lists of dicts and combines them
+            # it is like a cartesian product in that the points are analogous to items in sets
             points = []
             for i in a:
                 for j in b:
@@ -625,7 +651,6 @@ class Data:
             for sub in subsContainer.children:
                 var = sub.children[0].value
 
-                print(var)
                 val = sub.children[1].value
 
                 subs[var] = val
